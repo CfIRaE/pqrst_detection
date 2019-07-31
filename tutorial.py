@@ -3,50 +3,34 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pathlib
 from pqrst.src.detect import Detectors
+from pqrst.data_loaders.data_loader import load_nparray, load_csv
+from pqrst.utils.changefmt import npy_to_csv
+from pqrst.utils.savitzky_golay import savitzky_golay
+
+from scipy.signal import savgol_filter
 
 current_dir = pathlib.Path(__file__).resolve()
 
-example_dir = current_dir.parent/'data'/'ECG.tsv'
-example_dir_np = current_dir.parent/'data'/'dummy.npy'
+example_dir_npy = current_dir.parent/'data'/'image5_signal.npy'
 example_dir_csv = current_dir.parent/'data'/'data.csv'
 
-
-
-unfiltered_ecg_dat = np.loadtxt(example_dir)
-data__ = np.load(example_dir_np,allow_pickle = True)
-
-def csv_loader(path):
-    #load csv data
-    df = pd.read_csv(path)
-    return df.values
-
-csv_data = csv_loader(example_dir_csv)
-
-print("------------------------------------------------------------------------------------")
-print(len(data__))
-print("------------------------------------------------------------------------------------")
-# unfiltered_ecg = unfiltered_ecg_dat[:,0]
-unfiltered_ecg = data__
-# print(unfiltered_ecg)
-
+data = npy_to_csv(example_dir_npy)
+data_ = load_csv(example_dir_csv)
+# for i in range(len(data)):
+#     print(data[i][0])
+yhat = savitzky_golay(data[3], 511, 3)
 
 fs = 6880//3
 
 detectors = Detectors(fs)
 
-r_peaks = detectors.two_average_detector(csv_data)
+r_peaks = detectors.two_average_detector(yhat)
 print(r_peaks)
-#r_peaks = detectors.matched_filter_detector(unfiltered_ecg)
-#r_peaks = detectors.swt_detector(unfiltered_ecg)
-#r_peaks = detectors.engzee_detector(unfiltered_ecg)
-#r_peaks = detectors.christov_detector(unfiltered_ecg)
-#r_peaks = detectors.hamilton_detector(unfiltered_ecg)
-#r_peaks = detectors.pan_tompkins_detector(unfiltered_ecg)
 
 
 plt.figure()
-plt.plot(csv_data)
-plt.plot(r_peaks, csv_data[r_peaks], 'ro')
+plt.plot(yhat)
+plt.plot(r_peaks, [yhat[i] for i in r_peaks], 'ro')
 plt.title('Detected R-peaks')
 
 plt.show()
