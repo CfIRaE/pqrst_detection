@@ -16,7 +16,7 @@ current_dir = pathlib.Path(__file__).resolve()
 example_dir_npy = current_dir.parent/'data'/'image5_signal.npy'
 example_dir_csv = current_dir.parent/'data'/'data.csv'
 
-data = npy_to_csv(example_dir_npy)
+data = npy_to_csv(example_dir_npy, scaler_factor = 1, make_abs = True)
 data_ = load_csv(example_dir_csv)
 for i in range(len(data)):
     print(data[i][5])
@@ -45,7 +45,7 @@ plot_signal(data,r_peaks_list)
 smooth_data = []
 smooth_peaks = []
 for i in range(15):
-    yhat = savitzky_golay(data[i], 511, 3)
+    yhat = savitzky_golay(data[i], 211, 3)
     peaks = detectors.two_average_detector(yhat)
     smooth_data.append(yhat)
     smooth_peaks.append(peaks)
